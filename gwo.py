@@ -8,11 +8,57 @@ import random
 from time import perf_counter
 from typing import Callable, List, Optional, Sequence
 
+import numpy as np
+from sklearn.datasets import load_breast_cancer
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+
+class LogisticRegressionObjective:
+    """Score a feature mask on a fixed validation split (lower is better)."""
+
+    def __init__(self, X, y, feature_weight: float = 0.05,
+                 validation_size: float = 0.2, seed: int = 42):
+        if not 0 < feature_weight < 1:
+            raise ValueError("feature_weight must be between 0 and 1.")
+        X, y = np.asarray(X), np.asarray(y)
+        if X.ndim != 2 or X.shape[1] == 0:
+            raise ValueError("X must be a two-dimensional feature matrix.")
+        self.dimensions = X.shape[1]
+        self.feature_weight = feature_weight
+        self.seed = seed
+        self.X_train, self.X_validation, self.y_train, self.y_validation = (
+            train_test_split(X, y, test_size=validation_size,
+                             random_state=seed, stratify=y)
+        )
+        self.last_accuracy = None
+
+    def __call__(self, position: Sequence[int]) -> float:
+        mask = np.asarray(position)
+        if mask.shape != (self.dimensions,) or not np.isin(mask, [0, 1]).all():
+            raise ValueError("Each feature must have one binary selection bit.")
+        selected = mask.astype(bool)
+        self.last_accuracy = None
+        if not selected.any():
+            return 2.0  # Worse than every valid subset; no model can be fitted.
+        model = make_pipeline(
+            StandardScaler(),
+            LogisticRegression(max_iter=1000, random_state=self.seed),
+        )
+        model.fit(self.X_train[:, selected], self.y_train)
+        self.last_accuracy = float(model.score(
+            self.X_validation[:, selected], self.y_validation))
+        return ((1 - self.feature_weight) * (1 - self.last_accuracy)
+                + self.feature_weight * selected.sum() / self.dimensions)
+
 
 @dataclass
 class GreyWolf:
     position: List[int]
     fitness: float
+    accuracy: Optional[float] = None
 
 
 @dataclass
@@ -21,6 +67,7 @@ class GWOResult:
     best_fitness: float
     history: List[float]
     execution_time_ms: float
+    best_accuracy: Optional[float] = None
 
 
 def count_enabled(position: Sequence[int]) -> float:
@@ -33,14 +80,15 @@ def _evaluate(objective: Callable[[Sequence[int]], float],
     fitness = float(objective(position.copy()))
     if not math.isfinite(fitness):
         raise ValueError("The objective function must return a finite fitness.")
-    return GreyWolf(position, fitness)
+    return GreyWolf(position, fitness, getattr(objective, "last_accuracy", None))
 
 
 def _update_leaders(leaders: List[GreyWolf], wolf: GreyWolf) -> None:
     # Store independent snapshots, and shift older leaders down when needed.
     for index, leader in enumerate(leaders):
         if wolf.fitness < leader.fitness:
-            leaders.insert(index, GreyWolf(wolf.position.copy(), wolf.fitness))
+            leaders.insert(index, GreyWolf(wolf.position.copy(), wolf.fitness,
+                                           wolf.accuracy))
             del leaders[3:]
             return
 
@@ -55,7 +103,6 @@ def run_gwo(
 ) -> GWOResult:
     """Minimize objective and optionally write iteration fitness to a file.
 
-    Defaults are example settings because ObjectiveFunction.hpp was not supplied.
     dimensions is the number of on/off parameters. Positions contain integer
     bits, initialized independently with equal probability of 0 or 1. Continuous
     GWO proposals are clipped to [0, 1] and sampled as probabilities of enabling
@@ -109,27 +156,50 @@ def run_gwo(
     return GWOResult(
         leaders[0].position.copy(), leaders[0].fitness, history,
         (perf_counter() - start) * 1000.0,
+        leaders[0].accuracy,
     )
+
+
+def select_features(X, y, feature_weight: float = 0.05,
+                    validation_size: float = 0.2, seed: int = 42,
+                    num_wolves: int = 30, max_iterations: int = 100,
+                    output_path: Optional[str] = "results.txt") -> GWOResult:
+    """Select features using logistic regression validation accuracy.
+
+    Supply development data only. Keep final test data outside the GWO search.
+    Increasing feature_weight favors smaller subsets over accuracy.
+    """
+    objective = LogisticRegressionObjective(
+        X, y, feature_weight, validation_size, seed)
+    return run_gwo(objective, objective.dimensions, num_wolves,
+                   max_iterations, seed, output_path)
 
 
 def print_results(result: GWOResult) -> None:
     print(f"Best Parameters: {result.best_position}")
+    print(f"Selected Features: {sum(result.best_position)}/{len(result.best_position)}")
+    if result.best_accuracy is not None:
+        print(f"Validation Accuracy: {result.best_accuracy:.2%}")
     print(f"Best Fitness: {result.best_fitness:.10f}")
     print(f"Execution Time: {result.execution_time_ms:.2f} milliseconds")
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--dimensions", "--parameters", type=int, default=2,
-                        help="number of binary on/off parameters")
+    parser.add_argument("--feature-weight", type=float, default=0.05,
+                        help="fitness weight for feature count (default: 0.05)")
     parser.add_argument("--wolves", type=int, default=30)
     parser.add_argument("--iterations", type=int, default=100)
-    parser.add_argument("--seed", type=int)
+    parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output", default="results.txt")
     args = parser.parse_args()
-    print_results(run_gwo(dimensions=args.dimensions, num_wolves=args.wolves,
-                          max_iterations=args.iterations, seed=args.seed,
-                          output_path=args.output))
+    data = load_breast_cancer()
+    print("Example dataset: breast cancer")
+    print_results(select_features(data.data, data.target,
+                                  feature_weight=args.feature_weight,
+                                  num_wolves=args.wolves,
+                                  max_iterations=args.iterations, seed=args.seed,
+                                  output_path=args.output))
 
 
 if __name__ == "__main__":
