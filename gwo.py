@@ -96,6 +96,28 @@ def _update_leaders(leaders: List[GreyWolf], wolf: GreyWolf) -> None:
             return
 
 
+def _wolf_details(wolf: GreyWolf) -> str:
+    accuracy = "N/A" if wolf.accuracy is None else f"{wolf.accuracy:.2%}"
+    return (f"Wolf: {wolf.name}\n"
+            f"Parameters: {wolf.position}\n"
+            f"Selected Features: {sum(wolf.position)}/{len(wolf.position)}\n"
+            f"Validation Accuracy: {accuracy}\n"
+            f"Fitness: {wolf.fitness:.10f}\n")
+
+
+def _result_summary(result: GWOResult) -> str:
+    lines = []
+    if result.best_name:
+        lines.append(f"Best Wolf: {result.best_name}")
+    lines.append(f"Best Parameters: {result.best_position}")
+    lines.append(f"Selected Features: {sum(result.best_position)}/{len(result.best_position)}")
+    if result.best_accuracy is not None:
+        lines.append(f"Validation Accuracy: {result.best_accuracy:.2%}")
+    lines.append(f"Best Fitness: {result.best_fitness:.10f}")
+    lines.append(f"Execution Time: {result.execution_time_ms:.2f} milliseconds")
+    return "\n".join(lines)
+
+
 def run_gwo(
     objective: Callable[[Sequence[int]], float] = count_enabled,
     dimensions: int = 2,
@@ -103,8 +125,13 @@ def run_gwo(
     max_iterations: int = 100,
     seed: Optional[int] = None,
     output_path: Optional[str] = "results.txt",
+    detailed_output_path: Optional[str] = None,
 ) -> GWOResult:
-    """Minimize objective and optionally write iteration fitness to a file.
+    """Minimize objective and write round summaries and detailed wolf changes.
+
+    By default, detailed_result.txt is saved beside output_path. Set output_path
+    to None to disable file output, or supply detailed_output_path for a custom
+    detailed log (including when output_path is None).
 
     dimensions is the number of on/off parameters. Positions contain integer
     bits, initialized independently with equal probability of 0 or 1. Continuous
@@ -120,6 +147,12 @@ def run_gwo(
         if isinstance(value, bool) or not isinstance(value, int) or value < minimum:
             raise ValueError(f"{name} must be an integer >= {minimum}.")
 
+    if detailed_output_path is None and output_path is not None:
+        detailed_output_path = str(Path(output_path).with_name("detailed_result.txt"))
+    if (output_path is not None and detailed_output_path is not None
+            and Path(output_path).resolve() == Path(detailed_output_path).resolve()):
+        raise ValueError("Regular and detailed results must use different files.")
+
     start = perf_counter()
     rng = random.Random(seed)
     leaders = [GreyWolf([], math.inf) for _ in range(3)]
@@ -131,8 +164,14 @@ def run_gwo(
         _update_leaders(leaders, wolf)
 
     history = []
+    round_reports = []
     reports = []
+    if detailed_output_path is not None:
+        reports.append("Initial pack:\n")
+        reports.extend(_wolf_details(wolf) for wolf in wolves)
     for iteration in range(max_iterations):
+        if detailed_output_path is not None:
+            reports.append(f"Round {iteration + 1}:\n")
         a = 2.0 - iteration / max_iterations * 2.0
         for index, wolf in enumerate(wolves):
             position = []
@@ -150,36 +189,57 @@ def run_gwo(
                 position.append(int(rng.random() < probability_on))
             wolves[index] = _evaluate(objective, position, wolf.name)
             _update_leaders(leaders, wolves[index])
-            if output_path is not None:
+            if detailed_output_path is not None:
                 updated = wolves[index]
-                report = (f"Iteration {iteration + 1} | {updated.name} | "
-                          f"Fitness: {updated.fitness:.6g} | "
-                          f"Selected Features: {sum(position)}/{dimensions}")
-                if updated.accuracy is not None:
-                    report += f" | Validation Accuracy: {updated.accuracy:.2%}"
+                enabled = [i for i, (old, new) in enumerate(zip(wolf.position, position))
+                           if old == 0 and new == 1]
+                disabled = [i for i, (old, new) in enumerate(zip(wolf.position, position))
+                            if old == 1 and new == 0]
+                report = (_wolf_details(updated)
+                          + f"Previous Parameters: {wolf.position}\n"
+                          + f"Features Enabled (zero-based indices): {enabled}\n"
+                          + f"Features Disabled (zero-based indices): {disabled}\n"
+                          + f"Previous Fitness: {wolf.fitness:.10f}\n"
+                          + f"Fitness Change (negative is better): {updated.fitness - wolf.fitness:+.10f}\n"
+                          + f"Selected Feature Count Change: {sum(position) - sum(wolf.position):+d}\n")
+                if wolf.accuracy is not None and updated.accuracy is not None:
+                    report += (f"Previous Validation Accuracy: {wolf.accuracy:.2%}\n"
+                               f"Accuracy Change (percentage points): {(updated.accuracy - wolf.accuracy) * 100:+.4f}\n")
+                else:
+                    previous_accuracy = "N/A" if wolf.accuracy is None else f"{wolf.accuracy:.2%}"
+                    report += f"Previous Validation Accuracy: {previous_accuracy}\nAccuracy Change: N/A\n"
                 reports.append(report)
         history.append(leaders[0].fitness)
+        if output_path is not None:
+            current_best = min(wolves, key=lambda wolf: wolf.fitness)
+            round_reports.append(
+                f"Round {iteration + 1}\n"
+                + "Best wolf this round:\n" + _wolf_details(current_best)
+                + "Best found so far:\n" + _wolf_details(leaders[0]))
 
-    if output_path is not None:
-        with Path(output_path).open("w", encoding="utf-8") as output:
-            for iteration, fitness in enumerate(history, start=1):
-                output.write(f"{iteration}: {fitness:.6g}\n")
-            output.write("\nWolf updates:\n")
-            for report in reports:
-                output.write(report + "\n")
-
-    return GWOResult(
+    result = GWOResult(
         leaders[0].position.copy(), leaders[0].fitness, history,
         (perf_counter() - start) * 1000.0,
         leaders[0].accuracy,
         leaders[0].name,
     )
+    if output_path is not None:
+        with Path(output_path).open("w", encoding="utf-8") as output:
+            for report in round_reports:
+                output.write(report + "\n")
+            output.write("Final Result:\n" + _result_summary(result) + "\n")
+    if detailed_output_path is not None:
+        with Path(detailed_output_path).open("w", encoding="utf-8") as output:
+            for report in reports:
+                output.write(report + "\n")
+    return result
 
 
 def select_features(X, y, feature_weight: float = 0.05,
                     validation_size: float = 0.2, seed: int = 42,
                     num_wolves: int = 30, max_iterations: int = 100,
-                    output_path: Optional[str] = "results.txt") -> GWOResult:
+                    output_path: Optional[str] = "results.txt",
+                    detailed_output_path: Optional[str] = None) -> GWOResult:
     """Select features using logistic regression validation accuracy.
 
     Supply development data only. Keep final test data outside the GWO search.
@@ -188,18 +248,11 @@ def select_features(X, y, feature_weight: float = 0.05,
     objective = LogisticRegressionObjective(
         X, y, feature_weight, validation_size, seed)
     return run_gwo(objective, objective.dimensions, num_wolves,
-                   max_iterations, seed, output_path)
+                   max_iterations, seed, output_path, detailed_output_path)
 
 
 def print_results(result: GWOResult) -> None:
-    if result.best_name:
-        print(f"Best Wolf: {result.best_name}")
-    print(f"Best Parameters: {result.best_position}")
-    print(f"Selected Features: {sum(result.best_position)}/{len(result.best_position)}")
-    if result.best_accuracy is not None:
-        print(f"Validation Accuracy: {result.best_accuracy:.2%}")
-    print(f"Best Fitness: {result.best_fitness:.10f}")
-    print(f"Execution Time: {result.execution_time_ms:.2f} milliseconds")
+    print(_result_summary(result))
 
 
 def main() -> None:
@@ -210,6 +263,8 @@ def main() -> None:
     parser.add_argument("--iterations", type=int, default=100)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output", default="results.txt")
+    parser.add_argument("--detailed-output", default=None,
+                        help="detailed log path (default: detailed_result.txt beside --output)")
     args = parser.parse_args()
     data = load_breast_cancer()
     print("Example dataset: breast cancer")
@@ -217,7 +272,8 @@ def main() -> None:
                                   feature_weight=args.feature_weight,
                                   num_wolves=args.wolves,
                                   max_iterations=args.iterations, seed=args.seed,
-                                  output_path=args.output))
+                                  output_path=args.output,
+                                  detailed_output_path=args.detailed_output))
 
 
 if __name__ == "__main__":

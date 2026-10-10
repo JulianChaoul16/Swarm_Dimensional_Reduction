@@ -1,4 +1,6 @@
 requirements.txt
 results.txt
+detailed_result.txt
+__pycache__/
 test_result.txt
 test_results.txt

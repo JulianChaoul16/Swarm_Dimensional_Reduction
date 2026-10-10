@@ -38,8 +38,16 @@ a penalty of 2.0 and are not fitted. The returned `best_accuracy` is validation
 accuracy, not an independent test score. Keep final test data separate from
 the data passed to `select_features`; repeated search can overfit validation data.
 This is a heuristic tradeoff, not a guarantee of the smallest possible subset
-or a minimum accuracy threshold. `results.txt` records best fitness per iteration
-and each wolf's named updates, including fitness, feature count, and validation
-accuracy when available. Harry Potter names come from `name.py` and stay with
+or a minimum accuracy threshold. `results.txt` records the best wolf in each round
+and the best found so far, with parameters, feature count, fitness, and validation
+accuracy. It ends with the full final summary, including execution time.
+`detailed_result.txt` records the initial pack and every wolf's details each round:
+current and previous parameters, enabled/disabled feature indices (zero-based),
+fitness changes, feature-count changes, and accuracy changes in percentage points.
+A negative fitness change means improvement; unavailable accuracy is marked N/A.
+Use `--output` and `--detailed-output` to customize the paths. By default the
+detailed file is saved beside the regular file. For Python calls, `output_path=None`
+disables both files unless `detailed_output_path` is explicitly supplied.
+Harry Potter names come from `name.py` and stay with
 each wolf throughout the run. Larger packs reuse names with numbered suffixes.
 The final summary identifies the best wolf, also available as `result.best_name`.
