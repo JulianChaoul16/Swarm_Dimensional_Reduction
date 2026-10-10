@@ -38,4 +38,8 @@ a penalty of 2.0 and are not fitted. The returned `best_accuracy` is validation
 accuracy, not an independent test score. Keep final test data separate from
 the data passed to `select_features`; repeated search can overfit validation data.
 This is a heuristic tradeoff, not a guarantee of the smallest possible subset
-or a minimum accuracy threshold. `results.txt` records best fitness per iteration.
+or a minimum accuracy threshold. `results.txt` records best fitness per iteration
+and each wolf's named updates, including fitness, feature count, and validation
+accuracy when available. Harry Potter names come from `name.py` and stay with
+each wolf throughout the run. Larger packs reuse names with numbered suffixes.
+The final summary identifies the best wolf, also available as `result.best_name`.

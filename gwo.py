@@ -9,6 +9,7 @@ from time import perf_counter
 from typing import Callable, List, Optional, Sequence
 
 import numpy as np
+from name import wolf_name
 from sklearn.datasets import load_breast_cancer
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
@@ -59,6 +60,7 @@ class GreyWolf:
     position: List[int]
     fitness: float
     accuracy: Optional[float] = None
+    name: str = ""
 
 
 @dataclass
@@ -68,6 +70,7 @@ class GWOResult:
     history: List[float]
     execution_time_ms: float
     best_accuracy: Optional[float] = None
+    best_name: str = ""
 
 
 def count_enabled(position: Sequence[int]) -> float:
@@ -76,11 +79,11 @@ def count_enabled(position: Sequence[int]) -> float:
 
 
 def _evaluate(objective: Callable[[Sequence[int]], float],
-              position: List[int]) -> GreyWolf:
+              position: List[int], name: str = "") -> GreyWolf:
     fitness = float(objective(position.copy()))
     if not math.isfinite(fitness):
         raise ValueError("The objective function must return a finite fitness.")
-    return GreyWolf(position, fitness, getattr(objective, "last_accuracy", None))
+    return GreyWolf(position, fitness, getattr(objective, "last_accuracy", None), name)
 
 
 def _update_leaders(leaders: List[GreyWolf], wolf: GreyWolf) -> None:
@@ -88,7 +91,7 @@ def _update_leaders(leaders: List[GreyWolf], wolf: GreyWolf) -> None:
     for index, leader in enumerate(leaders):
         if wolf.fitness < leader.fitness:
             leaders.insert(index, GreyWolf(wolf.position.copy(), wolf.fitness,
-                                           wolf.accuracy))
+                                           wolf.accuracy, wolf.name))
             del leaders[3:]
             return
 
@@ -121,13 +124,14 @@ def run_gwo(
     rng = random.Random(seed)
     leaders = [GreyWolf([], math.inf) for _ in range(3)]
     wolves = []
-    for _ in range(num_wolves):
+    for index in range(num_wolves):
         wolf = _evaluate(objective, [rng.randrange(2)
-                                     for _ in range(dimensions)])
+                                     for _ in range(dimensions)], wolf_name(index))
         wolves.append(wolf)
         _update_leaders(leaders, wolf)
 
     history = []
+    reports = []
     for iteration in range(max_iterations):
         a = 2.0 - iteration / max_iterations * 2.0
         for index, wolf in enumerate(wolves):
@@ -144,19 +148,31 @@ def run_gwo(
                                       - coefficient_a * distance)
                 probability_on = max(0.0, min(1.0, sum(candidates) / 3.0))
                 position.append(int(rng.random() < probability_on))
-            wolves[index] = _evaluate(objective, position)
+            wolves[index] = _evaluate(objective, position, wolf.name)
             _update_leaders(leaders, wolves[index])
+            if output_path is not None:
+                updated = wolves[index]
+                report = (f"Iteration {iteration + 1} | {updated.name} | "
+                          f"Fitness: {updated.fitness:.6g} | "
+                          f"Selected Features: {sum(position)}/{dimensions}")
+                if updated.accuracy is not None:
+                    report += f" | Validation Accuracy: {updated.accuracy:.2%}"
+                reports.append(report)
         history.append(leaders[0].fitness)
 
     if output_path is not None:
         with Path(output_path).open("w", encoding="utf-8") as output:
             for iteration, fitness in enumerate(history, start=1):
                 output.write(f"{iteration}: {fitness:.6g}\n")
+            output.write("\nWolf updates:\n")
+            for report in reports:
+                output.write(report + "\n")
 
     return GWOResult(
         leaders[0].position.copy(), leaders[0].fitness, history,
         (perf_counter() - start) * 1000.0,
         leaders[0].accuracy,
+        leaders[0].name,
     )
 
 
@@ -176,6 +192,8 @@ def select_features(X, y, feature_weight: float = 0.05,
 
 
 def print_results(result: GWOResult) -> None:
+    if result.best_name:
+        print(f"Best Wolf: {result.best_name}")
     print(f"Best Parameters: {result.best_position}")
     print(f"Selected Features: {sum(result.best_position)}/{len(result.best_position)}")
     if result.best_accuracy is not None:
