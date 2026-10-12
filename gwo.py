@@ -1,6 +1,5 @@
 """Binary Grey Wolf Optimizer for selecting on/off parameters."""
 
-import argparse
 from dataclasses import dataclass
 import math
 from pathlib import Path
@@ -8,51 +7,7 @@ import random
 from time import perf_counter
 from typing import Callable, List, Optional, Sequence
 
-import numpy as np
 from name import wolf_name
-from sklearn.datasets import load_breast_cancer
-from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import make_pipeline
-from sklearn.preprocessing import StandardScaler
-
-
-class LogisticRegressionObjective:
-    """Score a feature mask on a fixed validation split (lower is better)."""
-
-    def __init__(self, X, y, feature_weight: float = 0.05,
-                 validation_size: float = 0.2, seed: int = 42):
-        if not 0 < feature_weight < 1:
-            raise ValueError("feature_weight must be between 0 and 1.")
-        X, y = np.asarray(X), np.asarray(y)
-        if X.ndim != 2 or X.shape[1] == 0:
-            raise ValueError("X must be a two-dimensional feature matrix.")
-        self.dimensions = X.shape[1]
-        self.feature_weight = feature_weight
-        self.seed = seed
-        self.X_train, self.X_validation, self.y_train, self.y_validation = (
-            train_test_split(X, y, test_size=validation_size,
-                             random_state=seed, stratify=y)
-        )
-        self.last_accuracy = None
-
-    def __call__(self, position: Sequence[int]) -> float:
-        mask = np.asarray(position)
-        if mask.shape != (self.dimensions,) or not np.isin(mask, [0, 1]).all():
-            raise ValueError("Each feature must have one binary selection bit.")
-        selected = mask.astype(bool)
-        self.last_accuracy = None
-        if not selected.any():
-            return 2.0  # Worse than every valid subset; no model can be fitted.
-        model = make_pipeline(
-            StandardScaler(),
-            LogisticRegression(max_iter=1000, random_state=self.seed),
-        )
-        model.fit(self.X_train[:, selected], self.y_train)
-        self.last_accuracy = float(model.score(
-            self.X_validation[:, selected], self.y_validation))
-        return ((1 - self.feature_weight) * (1 - self.last_accuracy)
-                + self.feature_weight * selected.sum() / self.dimensions)
 
 
 @dataclass
@@ -74,8 +29,8 @@ class GWOResult:
 
 
 def count_enabled(position: Sequence[int]) -> float:
-    """Example only: minimize the number of enabled parameters."""
-    return float(sum(position))
+    """Example maximization score favoring fewer enabled parameters."""
+    return -float(sum(position))
 
 
 def _evaluate(objective: Callable[[Sequence[int]], float],
@@ -89,7 +44,7 @@ def _evaluate(objective: Callable[[Sequence[int]], float],
 def _update_leaders(leaders: List[GreyWolf], wolf: GreyWolf) -> None:
     # Store independent snapshots, and shift older leaders down when needed.
     for index, leader in enumerate(leaders):
-        if wolf.fitness < leader.fitness:
+        if wolf.fitness > leader.fitness:
             leaders.insert(index, GreyWolf(wolf.position.copy(), wolf.fitness,
                                            wolf.accuracy, wolf.name))
             del leaders[3:]
@@ -127,7 +82,7 @@ def run_gwo(
     output_path: Optional[str] = "results.txt",
     detailed_output_path: Optional[str] = None,
 ) -> GWOResult:
-    """Minimize objective and write round summaries and detailed wolf changes.
+    """Maximize objective and write round summaries and detailed wolf changes.
 
     By default, detailed_result.txt is saved beside output_path. Set output_path
     to None to disable file output, or supply detailed_output_path for a custom
@@ -155,7 +110,7 @@ def run_gwo(
 
     start = perf_counter()
     rng = random.Random(seed)
-    leaders = [GreyWolf([], math.inf) for _ in range(3)]
+    leaders = [GreyWolf([], -math.inf) for _ in range(3)]
     wolves = []
     for index in range(num_wolves):
         wolf = _evaluate(objective, [rng.randrange(2)
@@ -200,7 +155,7 @@ def run_gwo(
                           + f"Features Enabled (zero-based indices): {enabled}\n"
                           + f"Features Disabled (zero-based indices): {disabled}\n"
                           + f"Previous Fitness: {wolf.fitness:.10f}\n"
-                          + f"Fitness Change (negative is better): {updated.fitness - wolf.fitness:+.10f}\n"
+                          + f"Fitness Change (positive is better): {updated.fitness - wolf.fitness:+.10f}\n"
                           + f"Selected Feature Count Change: {sum(position) - sum(wolf.position):+d}\n")
                 if wolf.accuracy is not None and updated.accuracy is not None:
                     report += (f"Previous Validation Accuracy: {wolf.accuracy:.2%}\n"
@@ -211,7 +166,7 @@ def run_gwo(
                 reports.append(report)
         history.append(leaders[0].fitness)
         if output_path is not None:
-            current_best = min(wolves, key=lambda wolf: wolf.fitness)
+            current_best = max(wolves, key=lambda wolf: wolf.fitness)
             round_reports.append(
                 f"Round {iteration + 1}\n"
                 + "Best wolf this round:\n" + _wolf_details(current_best)
@@ -235,46 +190,5 @@ def run_gwo(
     return result
 
 
-def select_features(X, y, feature_weight: float = 0.05,
-                    validation_size: float = 0.2, seed: int = 42,
-                    num_wolves: int = 30, max_iterations: int = 100,
-                    output_path: Optional[str] = "results.txt",
-                    detailed_output_path: Optional[str] = None) -> GWOResult:
-    """Select features using logistic regression validation accuracy.
-
-    Supply development data only. Keep final test data outside the GWO search.
-    Increasing feature_weight favors smaller subsets over accuracy.
-    """
-    objective = LogisticRegressionObjective(
-        X, y, feature_weight, validation_size, seed)
-    return run_gwo(objective, objective.dimensions, num_wolves,
-                   max_iterations, seed, output_path, detailed_output_path)
-
-
 def print_results(result: GWOResult) -> None:
     print(_result_summary(result))
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--feature-weight", type=float, default=0.05,
-                        help="fitness weight for feature count (default: 0.05)")
-    parser.add_argument("--wolves", type=int, default=30)
-    parser.add_argument("--iterations", type=int, default=100)
-    parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--output", default="results.txt")
-    parser.add_argument("--detailed-output", default=None,
-                        help="detailed log path (default: detailed_result.txt beside --output)")
-    args = parser.parse_args()
-    data = load_breast_cancer()
-    print("Example dataset: breast cancer")
-    print_results(select_features(data.data, data.target,
-                                  feature_weight=args.feature_weight,
-                                  num_wolves=args.wolves,
-                                  max_iterations=args.iterations, seed=args.seed,
-                                  output_path=args.output,
-                                  detailed_output_path=args.detailed_output))
-
-
-if __name__ == "__main__":
-    main()
