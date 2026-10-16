@@ -165,3 +165,15 @@ The final summary identifies the best wolf, also available as `result.best_name`
 
 Run experiments with `main.py`. For custom datasets, import `select_features`
 from `main`. The optimizer accepts any finite objective where higher is better.
+
+### Tests
+
+```sh
+python -m unittest -v
+```
+
+The tests cover CSV input validation, random-search budget accounting, and GWO's
+seed reproducibility, binary masks, best-so-far history, preservation of the best
+candidate and its metadata, zero-iteration initialization, and protection against
+objectives mutating stored positions. Optimizer tests use small synthetic
+objectives and do not rerun the breast cancer benchmark.
