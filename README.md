@@ -6,26 +6,57 @@ What is the minimum number of features an ML model can have while still having a
 
 ### Algorithm
 
-Every "Wolf" has n number of parameters dependent on the dimensions of model
-5 wolfs 
+Each wolf represents a subset of the dataset's feature columns as an on/off mask.
+The pack searches for subsets with high validation accuracy and fewer features.
 
 ### Logistic regression feature selection
 
 Install dependencies with `python -m pip install -r requirements.txt`.
-Run the built-in breast cancer example with:
+Download or clone this repository and put your CSV in the project folder (or
+pass its full path). Run from the project folder, replacing the filename and
+target column with your own:
 
 ```sh
-python main.py --wolves 5 --iterations 20 --seed 42
+python main.py my_dataset.csv --target outcome --wolves 5 --iterations 20 --seed 42
 ```
 
-For your own numeric classification data:
+The CSV must have a header row, numeric feature columns, and one classification
+target column. The target can contain text labels or numeric class labels and
+can appear anywhere in the file. For example, the file could start with:
+
+```csv
+length,width,outcome
+5.1,3.5,class_a
+6.2,2.8,class_b
+```
+
+Use your full dataset, with at least two classes and enough rows per class for
+both training and validation. The default validation fraction is 20%; adjust it
+with `--validation-size 0.3`. Each split must have room for every class.
+All columns except the target become candidate features, so remove IDs and
+other columns you do not want considered before running. Blank lines are skipped.
+Missing values, nonnumeric features, and infinite values are rejected with an
+error; clean or encode those columns first. This workflow supports tabular
+classification, not continuous regression targets, images, or free text.
+For semicolon-separated files, add `--delimiter ";"`. Quote paths and column
+names containing spaces.
+
+The terminal prints the all-features baseline, final score, selected column
+names, and feature order. Binary masks and zero-based indices in the log files
+follow that feature order, excluding the target column. The summary log also
+includes the dataset path, target, feature order, and selected column names.
+
+You can also load a CSV or supply arrays directly in Python:
 
 ```python
 from main import select_features
+from dataset import load_csv
 
+X, y, feature_names = load_csv("my_dataset.csv", target="outcome")
 result = select_features(X, y, num_wolves=5, max_iterations=20)
 selected_columns = [i for i, bit in enumerate(result.best_position) if bit]
 X_selected = X[:, selected_columns]
+selected_names = [feature_names[i] for i in selected_columns]
 ```
 
 Each wolf is scored initially and after every update using logistic regression
@@ -33,8 +64,7 @@ on its selected columns. Scaling is fitted only on training data. All wolves
 use the same stratified training/validation split for comparable scores.
 Fitness is maximized:
 `validation_accuracy - 0.05 * (selected_features / total_features)`.
-The breast cancer dataset has 30 features, so the denominator is 30 for this
-experiment; custom datasets use their own total feature count. Accuracy is a
+The denominator is the number of feature columns in your dataset. Accuracy is a
 fraction between 0 and 1. Use `--feature-weight` to vary the nonnegative penalty
 coefficient (zero disables the penalty). Empty masks receive fitness
 `-1 - feature_weight` and are not fitted. The returned `best_accuracy` is validation
@@ -59,6 +89,8 @@ The final summary identifies the best wolf, also available as `result.best_name`
 
 - `main.py` loads the dataset, evaluates an all-features baseline, runs the
   experiment, and reports results. The baseline uses the same validation split.
+- `dataset.py` reads a CSV, validates its values, and separates features from
+  the named target column.
 - `fitness.py` evaluates feature masks with logistic regression and applies the
   feature-count penalty.
 - `gwo.py` initializes the pack, updates wolf positions and leaders, and records
