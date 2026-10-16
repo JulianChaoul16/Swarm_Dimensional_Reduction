@@ -1,0 +1,936 @@
+{
+  "dataset": "sklearn.datasets.load_breast_cancer",
+  "rows": 569,
+  "total_features": 30,
+  "development_rows": 455,
+  "search_training_rows": 364,
+  "validation_rows": 91,
+  "test_rows": 114,
+  "seed": 42,
+  "wolves": 30,
+  "iterations": 100,
+  "feature_weight": 0.05,
+  "evaluation_budget_per_search": 3030,
+  "random_search_distribution": "independent Bernoulli(0.5) per feature",
+  "budget_policy": "Every objective call counts, including duplicate and empty masks; no caching. Baseline and final test fits are outside the search budget.",
+  "baseline": {
+    "features": 30,
+    "validation_accuracy": 0.978021978021978,
+    "fitness": 0.928021978021978,
+    "test_accuracy": 0.9824561403508771
+  },
+  "selected": {
+    "features": 6,
+    "validation_accuracy": 0.989010989010989,
+    "fitness": 0.979010989010989,
+    "test_accuracy": 0.9473684210526315,
+    "feature_names": [
+      "mean texture",
+      "mean perimeter",
+      "mean compactness",
+      "radius error",
+      "worst concave points",
+      "worst symmetry"
+    ],
+    "mask": [
+      0,
+      1,
+      1,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0
+    ],
+    "evaluations": 3030,
+    "convergence": [
+      {
+        "evaluations": 30,
+        "best_fitness": 0.9673443223443223
+      },
+      {
+        "evaluations": 60,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 90,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 120,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 150,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 180,
+        "best_fitness": 0.9773443223443223
+      },
+      {
+        "evaluations": 210,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 240,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 270,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 300,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 330,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 360,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 390,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 420,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 450,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 480,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 510,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 540,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 570,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 600,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 630,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 660,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 690,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 720,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 750,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 780,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 810,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 840,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 870,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 900,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 930,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 960,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 990,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1020,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1050,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1080,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1110,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1140,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1170,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1200,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1230,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1260,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1290,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1320,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1350,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1380,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1410,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1440,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1470,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1500,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1530,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1560,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1590,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1620,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1650,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1680,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1710,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1740,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1770,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1800,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1830,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1860,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1890,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1920,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1950,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 1980,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2010,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2040,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2070,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2100,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2130,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2160,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2190,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2220,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2250,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2280,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2310,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2340,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2370,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2400,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2430,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2460,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2490,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2520,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2550,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2580,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2610,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2640,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2670,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2700,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2730,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2760,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2790,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2820,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2850,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2880,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2910,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2940,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 2970,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 3000,
+        "best_fitness": 0.979010989010989
+      },
+      {
+        "evaluations": 3030,
+        "best_fitness": 0.979010989010989
+      }
+    ]
+  },
+  "random_search": {
+    "features": 9,
+    "validation_accuracy": 0.989010989010989,
+    "fitness": 0.974010989010989,
+    "test_accuracy": 0.956140350877193,
+    "feature_names": [
+      "mean texture",
+      "mean symmetry",
+      "perimeter error",
+      "area error",
+      "smoothness error",
+      "symmetry error",
+      "worst area",
+      "worst concave points",
+      "worst symmetry"
+    ],
+    "mask": [
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      0
+    ],
+    "evaluations": 3030,
+    "convergence": [
+      {
+        "evaluations": 30,
+        "best_fitness": 0.9673443223443223
+      },
+      {
+        "evaluations": 60,
+        "best_fitness": 0.9673443223443223
+      },
+      {
+        "evaluations": 90,
+        "best_fitness": 0.9673443223443223
+      },
+      {
+        "evaluations": 120,
+        "best_fitness": 0.9673443223443223
+      },
+      {
+        "evaluations": 150,
+        "best_fitness": 0.9673443223443223
+      },
+      {
+        "evaluations": 180,
+        "best_fitness": 0.9673443223443223
+      },
+      {
+        "evaluations": 210,
+        "best_fitness": 0.9673443223443223
+      },
+      {
+        "evaluations": 240,
+        "best_fitness": 0.9673443223443223
+      },
+      {
+        "evaluations": 270,
+        "best_fitness": 0.9673443223443223
+      },
+      {
+        "evaluations": 300,
+        "best_fitness": 0.969010989010989
+      },
+      {
+        "evaluations": 330,
+        "best_fitness": 0.969010989010989
+      },
+      {
+        "evaluations": 360,
+        "best_fitness": 0.969010989010989
+      },
+      {
+        "evaluations": 390,
+        "best_fitness": 0.969010989010989
+      },
+      {
+        "evaluations": 420,
+        "best_fitness": 0.969010989010989
+      },
+      {
+        "evaluations": 450,
+        "best_fitness": 0.969010989010989
+      },
+      {
+        "evaluations": 480,
+        "best_fitness": 0.969010989010989
+      },
+      {
+        "evaluations": 510,
+        "best_fitness": 0.969010989010989
+      },
+      {
+        "evaluations": 540,
+        "best_fitness": 0.969010989010989
+      },
+      {
+        "evaluations": 570,
+        "best_fitness": 0.969010989010989
+      },
+      {
+        "evaluations": 600,
+        "best_fitness": 0.969010989010989
+      },
+      {
+        "evaluations": 630,
+        "best_fitness": 0.969010989010989
+      },
+      {
+        "evaluations": 660,
+        "best_fitness": 0.969010989010989
+      },
+      {
+        "evaluations": 690,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 720,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 750,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 780,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 810,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 840,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 870,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 900,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 930,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 960,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 990,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 1020,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 1050,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 1080,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 1110,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 1140,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 1170,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 1200,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 1230,
+        "best_fitness": 0.9706776556776557
+      },
+      {
+        "evaluations": 1260,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1290,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1320,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1350,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1380,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1410,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1440,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1470,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1500,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1530,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1560,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1590,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1620,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1650,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1680,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1710,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1740,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1770,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1800,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1830,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1860,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1890,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1920,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1950,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 1980,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2010,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2040,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2070,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2100,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2130,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2160,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2190,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2220,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2250,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2280,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2310,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2340,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2370,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2400,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2430,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2460,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2490,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2520,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2550,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2580,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2610,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2640,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2670,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2700,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2730,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2760,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2790,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2820,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2850,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2880,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2910,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2940,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 2970,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 3000,
+        "best_fitness": 0.974010989010989
+      },
+      {
+        "evaluations": 3030,
+        "best_fitness": 0.974010989010989
+      }
+    ]
+  },
+  "environment": {
+    "python": "3.14.4",
+    "numpy": "2.5.3",
+    "scikit_learn": "1.9.1"
+  }
+}
